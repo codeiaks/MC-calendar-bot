@@ -18,6 +18,9 @@ Created on Thu Jul 11 2024
 
 @author: cod3iaks
 """
+import datetime
+import os
+import pytz
 import discord
 from discord.ext import commands
 from google.auth.transport.requests import Request
@@ -25,9 +28,7 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from tabulate import tabulate
-import datetime
-import os.path
-import pytz
+
 
 SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
 
@@ -35,7 +36,7 @@ SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
 # could also be user id
 ALLOWED_ROLE_ID = ALLOWED_ROLE_ID
 # Enter the bot token ID
-TOKEN = ''
+TOKEN = 'YOUR_BOT_TOKEN'
 
 bot = commands.Bot(command_prefix="/", intents=discord.Intents.default())
 
@@ -58,7 +59,7 @@ def authenticate_google_calendar():
 
 # Fetch upcoming events from Google Calendar
 def fetch_google_calendar_events(service):
-    now = datetime.datetime.utcnow().isoformat() + 'Z'
+    now = datetime.datetime.now(datetime.UTC).isoformat() + 'Z'
     events_result = service.events().list(calendarId='primary', timeMin=now,
                                           maxResults=25, singleEvents=True, 
                                           orderBy='startTime').execute()
@@ -68,9 +69,9 @@ def fetch_google_calendar_events(service):
         return 'No upcoming events found.'
     else:
         event_list = []
-        for event in evetns:
+        for event in events:
             start = event['start'].get('dateTime', event['start'].get('date'))
-            start = datetime.datetime.fromisocalendar(start.replace('Z', '+00:00'))
+            start = datetime.datetime.fromisoformat(start.replace('Z', '+00:00'))
             event_list.append([start.strftime('%Y-%m-%d %H:%M:%S'), event['summary']])
         
         return tabulate(event_list, headers=["Start", "Event"], tablefmt="pretty")
